@@ -1,0 +1,21 @@
+models:
+  FamilyRelation:
+    id: id
+    name: string
+    softDeletes
+    timestamps
+
+  Member:
+    id: id
+    name: string
+    dob: date
+    gender: string
+    family_relation_id: id foreign:family_relations nullable
+    phone1: string:11 nullable
+    phone2: string:11 nullable
+    whatsapp: string:11 nullable
+    image: string nullable
+    hasLogin: integer
+    user_id: id foreign:users
+    timestamps
+    softDeletes

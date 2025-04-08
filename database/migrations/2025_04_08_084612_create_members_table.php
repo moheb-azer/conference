@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->date('dob');
-            $table->string('gender');
+            $table->enum('gender', ["m","f"]);
             $table->foreignId('family_relation_id')->nullable()->constrained();
             $table->string('phone1', 11)->nullable();
             $table->string('phone2', 11)->nullable();

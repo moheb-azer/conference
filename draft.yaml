@@ -9,7 +9,7 @@ models:
     id: id
     name: string
     dob: date
-    gender: string
+    gender: enum:m,f
     family_relation_id: id foreign:family_relations nullable
     phone1: string:11 nullable
     phone2: string:11 nullable

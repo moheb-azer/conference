@@ -25,7 +25,7 @@ class MemberFactory extends Factory
         return [
             'name' => fake()->name(),
             'dob' => fake()->date(),
-            'gender' => fake()->word(),
+            'gender' => fake()->randomElement(["m","f"]),
             'family_relation_id' => FamilyRelation::factory(),
             'phone1' => fake()->regexify('[A-Za-z0-9]{11}'),
             'phone2' => fake()->regexify('[A-Za-z0-9]{11}'),

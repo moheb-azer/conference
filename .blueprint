@@ -1,11 +1,11 @@
 created:
     - database/factories/FamilyRelationFactory.php
     - database/factories/MemberFactory.php
-    - database/migrations/2025_04_07_141255_create_family_relations_table.php
-    - database/migrations/2025_04_07_141256_create_members_table.php
+    - database/migrations/2025_04_08_084611_create_family_relations_table.php
+    - database/migrations/2025_04_08_084612_create_members_table.php
     - app/Models/FamilyRelation.php
     - app/Models/Member.php
 models:
-    User: { name: string, email: string, status: 'boolean default:1', type: "enum:'admin','member' default:'member'", phone1: 'string:11 nullable default:NULL', phone2: 'string:11 nullable default:NULL', whatsapp: 'string:11 nullable default:NULL', gender: "enum:'m','f' nullable default:NULL", image: 'string nullable default:NULL', email_verified_at: 'timestamp nullable default:NULL', password: string, remember_token: 'string:100 nullable default:NULL' }
+    User: { name: string, email: string, email_verified_at: 'timestamp nullable default:NULL', status: 'boolean default:1', is_admin: boolean, password: string, remember_token: 'string:100 nullable default:NULL' }
     FamilyRelation: { id: id, name: string, softdeletes: softDeletes, timestamps: timestamps }
-    Member: { id: id, name: string, dob: date, gender: string, family_relation_id: 'id foreign:family_relations nullable', phone1: 'string:11 nullable', phone2: 'string:11 nullable', whatsapp: 'string:11 nullable', image: 'string nullable', hasLogin: integer, user_id: 'id foreign:users', timestamps: timestamps, softdeletes: softDeletes }
+    Member: { id: id, name: string, dob: date, gender: 'enum:m,f', family_relation_id: 'id foreign:family_relations nullable', phone1: 'string:11 nullable', phone2: 'string:11 nullable', whatsapp: 'string:11 nullable', image: 'string nullable', hasLogin: integer, user_id: 'id foreign:users', timestamps: timestamps, softdeletes: softDeletes }

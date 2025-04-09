@@ -33,6 +33,7 @@ class MemberFactory extends Factory
             'image' => fake()->word(),
             'hasLogin' => fake()->numberBetween(-10000, 10000),
             'user_id' => User::factory(),
+            'member_id' => Member::factory(),
         ];
     }
 }

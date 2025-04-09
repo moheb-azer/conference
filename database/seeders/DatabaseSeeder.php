@@ -16,11 +16,21 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Moheb Azer',
-            'email' => 'admin@admin.com',
-            'is_admin'=> '1',
-            'password' => Hash::make('12345678'),
-        ]);
+        User::create(
+            [
+                'name' => 'Moheb Azer',
+                'email' => 'admin@admin.com',
+                'is_admin'=> '1',
+                'password' => Hash::make('12345678'),
+            ]);
+
+            User::create(
+            [
+                'name' => 'test',
+                'email' => 'test@admin.com',
+                'is_admin'=> '0',
+                'password' => Hash::make('12345678'),
+            ]
+        );
     }
 }

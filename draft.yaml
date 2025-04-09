@@ -17,5 +17,7 @@ models:
     image: string nullable
     hasLogin: integer
     user_id: id foreign:users
+    member_id: id foreign:members nullable
     timestamps
     softDeletes
+

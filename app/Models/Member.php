@@ -2,6 +2,10 @@
 
 namespace App\Models;
 
+use App\Traits\CreateOrUpdateUserMember;
+use App\Traits\HandleImageDeletions;
+use App\Traits\HandleWhatsappPhone;
+use App\Traits\HasAgeAttribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Member extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, CreateOrUpdateUserMember, HandleWhatsappPhone, HandleImageDeletions,HasAgeAttribute;
 
     /**
      * The attributes that are mass assignable.
@@ -27,6 +31,12 @@ class Member extends Model
         'image',
         'hasLogin',
         'user_id',
+        'member_id',
+
+        'user_email',
+        'user_password',
+        'is_phone1_whatsapp',
+        'is_phone2_whatsapp',
     ];
 
     /**
@@ -39,6 +49,7 @@ class Member extends Model
         'dob' => 'date',
         'family_relation_id' => 'integer',
         'user_id' => 'integer',
+        'member_id' => 'integer',
     ];
 
     public function familyRelation(): BelongsTo
@@ -49,5 +60,10 @@ class Member extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function member(): BelongsTo
+    {
+        return $this->belongsTo(Member::class);
     }
 }

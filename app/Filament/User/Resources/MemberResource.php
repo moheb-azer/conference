@@ -16,14 +16,20 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class   MemberResource extends Resource
 {
+
     protected static ?string $model = Member::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-user';
     protected static ?string $label = 'Profile';
+    public static function getPluralLabel(): ?string
+    {
+        return 'Profile';
+    }
 
     public static function form(Form $form): Form
     {
@@ -33,9 +39,11 @@ class   MemberResource extends Resource
                     ->schema([
                         Forms\Components\TextInput::make('user.email')
                             ->email()
+                            ->default(Auth::user()->email)
                             ->rules(function (callable $get, ?\App\Models\Member $record) {
+                                $userId = $record?->user?->id ?? Auth::id();
                                 return [
-                                    Rule::unique('users', 'email')->ignore($record?->user?->id),
+                                    Rule::unique('users', 'email')->ignore($userId),
                                 ];
                             })
                             ->required()
@@ -47,7 +55,7 @@ class   MemberResource extends Resource
                             )
                             ->password()
                             ->nullable() // Allow null when editing
-                            ->required(fn($livewire) => $livewire instanceof CreateRecord) // Required only on create
+//                            ->required(fn($livewire) => $livewire instanceof CreateRecord) // Required only on create
                             ->hidden(fn($livewire) => $livewire instanceof ViewRecord) // Required only on create
                             ->dehydrateStateUsing(fn($state) => filled($state) ? bcrypt($state) : null) // Hash password if filled
                             ->dehydrated(fn($state) => filled($state)) // Only dehydrate when a password is provided
@@ -58,20 +66,24 @@ class   MemberResource extends Resource
                     ->schema([
                         Forms\Components\TextInput::make('name')
                             ->required()
+                            ->default(Auth::user()->name)
                             ->maxLength(255)
                             ->columnSpan(4),
                         Forms\Components\DatePicker::make('dob')
                             ->required()
+                            ->maxDate(now()->subDay())
                             ->columnSpan(4),
                         Forms\Components\Select::make('gender')
+                            ->required()
                             ->options([
                                 'm' => 'Male',
                                 'f' => 'Female',
                             ])
                             ->columnSpan(4),
-//                        Forms\Components\Select::make('family_relation_id')
-//                            ->relationship('familyRelation', 'name')
-//                            ->default(null),
+                        Forms\Components\TextInput::make('hasLogin')
+                            ->default(auth()->id())
+                            ->disabled()
+                            ->hidden(),
                         Forms\Components\TextInput::make('phone1')
                             ->tel()
                             ->reactive()
@@ -116,10 +128,10 @@ class   MemberResource extends Resource
                             ->hidden()
                             ->length(11)
                             ->afterStateHydrated(function ($state, callable $set, callable $get) {
-                                if($state == ""){
+                                if ($state == "") {
                                     $set('is_phone1_whatsapp', false);
                                     $set('is_phone2_whatsapp', false);
-                                }elseif ($state === $get('phone1')) {
+                                } elseif ($state === $get('phone1')) {
                                     $set('is_phone1_whatsapp', true);
                                     $set('is_phone2_whatsapp', false);
                                 } elseif ($state === $get('phone2')) {
@@ -128,74 +140,77 @@ class   MemberResource extends Resource
                                 }
                             }),
                         Forms\Components\FileUpload::make('image')
-                            ->image(),
-                        Forms\Components\TextInput::make('hasLogin')
-                            ->required()
-                            ->numeric(),
-                        Forms\Components\Select::make('user_id')
-                            ->relationship('user', 'name')
-                            ->required(),
+                            ->image()
+                            ->avatar()
+                            ->imageEditor()
+                            ->circleCropper(),
+//                        Forms\Components\TextInput::make('hasLogin')
+//                            ->required()
+//                            ->numeric(),
+//                        Forms\Components\Select::make('user_id')
+//                            ->relationship('user', 'name')
+//                            ->required(),
                     ])
                     ->columns(12)
                     ->columnSpan(2),
             ])->columns(2);
     }
 
-    public static function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('dob')
-                    ->date()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('gender')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('familyRelation.name')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('phone1')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('phone2')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('whatsapp')
-                    ->searchable(),
-                Tables\Columns\ImageColumn::make('image'),
-                Tables\Columns\TextColumn::make('hasLogin')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('user.name')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('deleted_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-            ])
-            ->filters([
-                Tables\Filters\TrashedFilter::make(),
-            ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\ForceDeleteBulkAction::make(),
-                    Tables\Actions\RestoreBulkAction::make(),
-                ]),
-            ]);
-    }
+//    public static function table(Table $table): Table
+//    {
+//        return $table
+//            ->columns([
+//                Tables\Columns\TextColumn::make('name')
+//                    ->searchable(),
+//                Tables\Columns\TextColumn::make('dob')
+//                    ->date()
+//                    ->sortable(),
+//                Tables\Columns\TextColumn::make('gender')
+//                    ->searchable(),
+//                Tables\Columns\TextColumn::make('familyRelation.name')
+//                    ->numeric()
+//                    ->sortable(),
+//                Tables\Columns\TextColumn::make('phone1')
+//                    ->searchable(),
+//                Tables\Columns\TextColumn::make('phone2')
+//                    ->searchable(),
+//                Tables\Columns\TextColumn::make('whatsapp')
+//                    ->searchable(),
+//                Tables\Columns\ImageColumn::make('image'),
+//                Tables\Columns\TextColumn::make('hasLogin')
+//                    ->numeric()
+//                    ->sortable(),
+//                Tables\Columns\TextColumn::make('user.name')
+//                    ->numeric()
+//                    ->sortable(),
+//                Tables\Columns\TextColumn::make('created_at')
+//                    ->dateTime()
+//                    ->sortable()
+//                    ->toggleable(isToggledHiddenByDefault: true),
+//                Tables\Columns\TextColumn::make('updated_at')
+//                    ->dateTime()
+//                    ->sortable()
+//                    ->toggleable(isToggledHiddenByDefault: true),
+//                Tables\Columns\TextColumn::make('deleted_at')
+//                    ->dateTime()
+//                    ->sortable()
+//                    ->toggleable(isToggledHiddenByDefault: true),
+//            ])
+//            ->filters([
+//                Tables\Filters\TrashedFilter::make(),
+//            ])
+//            ->actions([
+//                Tables\Actions\ViewAction::make(),
+//                Tables\Actions\EditAction::make(),
+//            ])
+//            ->bulkActions([
+//                Tables\Actions\BulkActionGroup::make([
+//                    Tables\Actions\DeleteBulkAction::make(),
+//                    Tables\Actions\ForceDeleteBulkAction::make(),
+//                    Tables\Actions\RestoreBulkAction::make(),
+//                ]),
+//            ]);
+//    }
 
     public static function getRelations(): array
     {

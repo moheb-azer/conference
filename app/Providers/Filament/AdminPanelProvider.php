@@ -60,7 +60,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
                 //                comment next line to make admin able to visit user panel
-//                RedirectToUserPanelMiddleware::class
+                RedirectToUserPanelMiddleware::class
             ]);
     }
 }

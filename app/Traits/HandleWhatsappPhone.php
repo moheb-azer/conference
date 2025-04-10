@@ -11,18 +11,25 @@ trait HandleWhatsappPhone
      */
     protected static function bootHandleWhatsappPhone(): void
     {
-        static::creating(function ($model) {
+
+        static::saving(function ($model) {
+            // Always update whatsapp based on the flags
             static::handleWhatsappPhone($model);
         });
-        static::updating(function ($model) {
-            static::handleWhatsappPhone($model);
-        });
+//        static::creating(function ($model) {
+//
+//            static::handleWhatsappPhone($model);
+////            dd($model);
+//        });
+//        static::updating(function ($model) {
+//            static::handleWhatsappPhone($model);
+//        });
     }
 
     /**
      * Handle the assignment of the WhatsApp phone number.
      *
-     * @param Model $model
+     * @param  Model  $model
      * @return void
      */
     public static function handleWhatsappPhone(Model $model): void
@@ -35,5 +42,8 @@ trait HandleWhatsappPhone
             $model->whatsapp = null;
         }
         unset($model->is_phone1_whatsapp, $model->is_phone2_whatsapp);
+
+
+//        dd($model);
     }
 }

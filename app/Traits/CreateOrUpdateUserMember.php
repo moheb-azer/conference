@@ -15,6 +15,8 @@ trait CreateOrUpdateUserMember
     {
         static::saving(function ($model) {
 
+            $model->user_id = $model->user_id ?? auth()->id();
+
             if (isset($model->user_email)) {
                 // If the model already has an associated user, update it.
                 if ($model->user_id) {
@@ -22,7 +24,7 @@ trait CreateOrUpdateUserMember
                     $user = User::find($model->user_id);
                     if ($user) {
                         $updateData = [
-                            'name'  => $model->name,
+                            'name' => $model->name,
                             'email' => $model->user_email,
                         ];
                         // Only update password if provided
@@ -34,8 +36,8 @@ trait CreateOrUpdateUserMember
                 } else {
                     // Otherwise, create a new user and assign its id to the member.
                     $user = User::create([
-                        'name'     => $model->name,
-                        'email'    => $model->user_email,
+                        'name' => $model->name,
+                        'email' => $model->user_email,
                         'password' => bcrypt($model->user_password),
                     ]);
                     $model->user_id = $user->id;

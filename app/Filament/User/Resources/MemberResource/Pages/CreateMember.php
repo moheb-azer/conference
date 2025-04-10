@@ -3,7 +3,6 @@
 namespace App\Filament\User\Resources\MemberResource\Pages;
 
 use App\Filament\User\Resources\MemberResource;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateMember extends CreateRecord

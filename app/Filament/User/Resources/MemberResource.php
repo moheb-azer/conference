@@ -12,10 +12,9 @@ use Filament\Resources\Pages\CreateRecord;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
@@ -26,6 +25,7 @@ class   MemberResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-user';
     protected static ?string $label = 'Profile';
+
     public static function getPluralLabel(): ?string
     {
         return 'Profile';
@@ -57,12 +57,13 @@ class   MemberResource extends Resource
                             ->nullable() // Allow null when editing
 //                            ->required(fn($livewire) => $livewire instanceof CreateRecord) // Required only on create
                             ->hidden(fn($livewire) => $livewire instanceof ViewRecord) // Required only on create
-                            ->dehydrateStateUsing(fn($state) => filled($state) ? bcrypt($state) : null) // Hash password if filled
+                            ->dehydrateStateUsing(fn($state
+                            ) => filled($state) ? bcrypt($state) : null) // Hash password if filled
                             ->dehydrated(fn($state) => filled($state)) // Only dehydrate when a password is provided
                             ->maxLength(20),
                     ])->columnSpan(2),
 
-                Fieldset::make(__('Login Data'))
+                Fieldset::make(__('Personal Data'))
                     ->schema([
                         Forms\Components\TextInput::make('name')
                             ->required()
@@ -70,9 +71,39 @@ class   MemberResource extends Resource
                             ->maxLength(255)
                             ->columnSpan(4),
                         Forms\Components\DatePicker::make('dob')
+                            ->label(__('Date Of Birth'))
                             ->required()
                             ->maxDate(now()->subDay())
-                            ->columnSpan(4),
+                            ->reactive() // make it reactive to trigger age update
+                            ->afterStateUpdated(function (callable $set, $state) {
+                                // Calculate age from selected DOB
+                                if ($state) {
+                                    $set('age', Carbon::parse($state)->age);
+                                } else {
+                                    $set('age', null);
+                                }
+                            })
+                            ->hidden(fn($livewire) => $livewire instanceof ViewRecord)
+                            ->columnSpan(fn($livewire) => $livewire instanceof EditRecord ||
+                            $livewire instanceof CreateRecord
+                                ? 2
+                                : 4
+                            ),
+                        Forms\Components\Placeholder::make('age')
+                            ->label(__('Age'))
+                            ->content(function (callable $get, $record) {
+                                $dob = $get('dob');
+                                if ($dob) {
+                                    $age = Carbon::parse($dob)->age;
+                                    return "{$age} years old";
+                                }
+                                return $record?->age.' Years Old' ?? '-';
+                            })
+                            ->columnSpan(fn($livewire) => $livewire instanceof EditRecord ||
+                            $livewire instanceof CreateRecord
+                                ? 2
+                                : 4
+                            ),
                         Forms\Components\Select::make('gender')
                             ->required()
                             ->options([
@@ -92,8 +123,8 @@ class   MemberResource extends Resource
                             ->startsWith(['010', '011', '012', '015'])
                             ->columnSpan(3),
                         Forms\Components\Checkbox::make('is_phone1_whatsapp')
-                            ->label(__('Is Whatsapp'))
-                            ->hint(__("enter phone number to check"))
+                            ->label(__('Whatsapp'))
+//                            ->hint(__("enter phone number to check"))
                             ->reactive()
                             ->inline(false)
                             ->disabled(fn($get) => !$get('phone1') || strlen($get('phone1')) !== 11)
@@ -110,10 +141,10 @@ class   MemberResource extends Resource
                             ->startsWith(['010', '011', '012', '015'])
                             ->columnSpan(3),
                         Forms\Components\Checkbox::make('is_phone2_whatsapp')
-                            ->label(__('Is Whatsapp'))
-                            ->hint(__("enter phone number befor check"))
+                            ->label(__('Whatsapp'))
+//                            ->hint(__("enter phone number to check"))
                             ->reactive()
-                            ->inline()
+                            ->inline(false)
                             ->disabled(fn($get) => !$get('phone2') || strlen($get('phone2')) !== 11)
                             ->afterStateUpdated(function ($state, callable $set, callable $get) {
                                 if ($state) {
@@ -215,7 +246,7 @@ class   MemberResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\FamilyMembersRelationManager::class
         ];
     }
 
